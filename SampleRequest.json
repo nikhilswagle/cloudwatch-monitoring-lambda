@@ -1,0 +1,41 @@
+{
+    "eventName": "create-metric-filter",
+    "logGroupNamePrefix": "/aws/lambda",
+    "filterName": "generic-error-filter",
+    "filterPattern": "{ $.errorCode = \"*\" }",
+    "metricName": "error-count",
+    "namespace": "demo",
+    "value": "1",
+    "defaultValue": 0,
+    "metricAlarm": {
+      "alarmName": "generic-error-alarm",
+      "alarmDescription": "Alerts upon generic errors",
+      "actionsEnabled": "True",
+      "alarmActions": [
+        "arn:aws:sns:us-east-1:847104828221:web-server-alerts"
+      ],
+      "statistic": "SampleCount",
+      "period": 60,
+      "unit": "Seconds",
+      "evaluationPeriods": 1,
+      "datapointsToAlarm": 1,
+      "threshold": 10,
+      "comparisonOperator": "GreaterThanOrEqualToThreshold",
+      "treatMissingData": "missing",
+      "evaluateLowSampleCountPercentile": "evaluate",
+      "tags": [
+        {
+          "Key": "project",
+          "Value": "FICO"
+        }
+      ]
+    },
+    "dashboard": {
+        "name": "Generic Error Dashboard",
+        "widget": {
+            "title": "Generic Error Widget",
+            "stat": "SampleCount",
+            "region": "us-east-1"
+        }
+    }
+  }

@@ -1,0 +1,33 @@
+{
+    "periodOverride": "inherit",
+    "widgets": [
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 3,
+            "width": 6,
+            "height": 6,
+            "properties": {
+                "metrics": [
+                    [ "demo", "error-count" ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "period": 300,
+                "stat": "SampleCount",
+                "region": "us-east-1",
+                "title": "Generic Error Widget"
+            }
+        },
+        {
+            "type": "text",
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 3,
+            "properties": {
+                "markdown": "\n## Generic Error Dashboard\nThis dashboard has been created programmatically through lambda **arn:aws:lambda:us-east-1:847104828221:function:cloudwatch-monitor-lambda**\n\nPlease refrain from modifying it manually.\n"
+            }
+        }
+    ]
+}
