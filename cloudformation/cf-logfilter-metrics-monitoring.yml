@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: The AWS cloudFormation template for creating emr monitoring lambda function.
+
+Parameters:
+  LambdaCodeS3BucketName:
+    Type: String
+    Description: S3 bucket name that holds lambda code zip.
+  LambdaCodeS3Key:
+    Type: String
+    Description: S3 bucket key for lambda code zip
+
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: logfilter-metrics-monitoring-lambda-role
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+
+  LambdaPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: logfilter-metrics-monitoring-lambda-policy
+      Roles:
+        - !Ref LambdaRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*
+          - Effect: Allow
+            Action:
+              - cloudwatch:PutMetricAlarm
+              - cloudwatch:PutDashboard
+              - cloudwatch:GetDashboard
+              - cloudwatch:ListDashboards
+              - cloudwatch:ListMetrics
+              - cloudwatch:DescribeAlarms
+              - cloudwatch:DescribeAlarmsForMetric
+              - cloudwatch:DeleteDashboards
+              - cloudwatch:DeleteAlarms
+          - Effect: Allow
+            Action:
+              - logs:PutMetricFilter
+              - logs:DeleteMetricFilter
+              - logs:DescribeLogGroups
+            Resource:
+              - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
+          - Effect: Allow
+            Action:
+              - elasticmapreduce:DescribeCluster
+              - elasticmapreduce:ListClusters
+              - elasticmapreduce:ListInstanceFleets
+              - elasticmapreduce:ListInstanceGroups
+              - elasticmapreduce:ListInstances
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - kms:decrypt
+            Resource: '*'
+
+  LogFilterMetricsMonitoringLambda:
+    DependsOn:
+      - LambdaPolicy
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: logfilter-metrics-monitoring-lambda
+      Handler: index.lambda_handler
+      Runtime: python3.7
+      Description: Set up monitoring dashboard and alarms
+      MemorySize: 128
+      Timeout: 300
+      Role: !GetAtt LambdaRole.Arn
+      Tags:
+        - Key: name
+          Value: logfilter-metrics-monitoring-lambda
+        - Key: project_name
+          Value: Goldmine
+      Code:
+        S3Bucket: !Ref LambdaCodeS3BucketName
+        S3Key: !Ref LambdaCodeS3Key
+
+Outputs:
+  OutLogFilterMetricsMonitoringLambdaArn:
+    Description: Dashboard Monitoring Lambda ARN
+    Value: !GetAtt LogFilterMetricsMonitoringLambda.Arn
+    Export:
+      Name: LogFilterMetricsMonitoringLambdaArn
+
+  OutLambdaRoleArn:
+    Description: Log Filter Metrics Monitoring Lambda Role ARN
+    Value: !GetAtt LambdaRole.Arn
+    Export:
+      Name: LogFilterMetricsMonitoringLambdaRoleArn

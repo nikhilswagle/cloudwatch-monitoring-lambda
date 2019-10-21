@@ -2,9 +2,9 @@ import logging
 import traceback
 import json
 import boto3
-from . import metricFilterHandler
-from . import metricAlarmHandler
-from . import dashboardHandler
+import metricFilterHandler
+import metricAlarmHandler
+import dashboardHandler
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -31,7 +31,7 @@ def handle_request(event, context):
         except Exception as e:
             logger.error(e)
             logger.error(traceback.print_stack())
-            return
+            return e
         
         metricFilterResp = None
         if event['eventName'] == 'create-metric-filter':
@@ -40,26 +40,18 @@ def handle_request(event, context):
                 metricFilterHandler.create_metric_filter(event, logGroup['logGroupName'])
             if 'metricAlarm' in event:
                 # Create metric alarm
-                metricAlarmHandler.create_metric_alarm(event)
-            if 'dashboard' in event:
-                # Add metric to dashboard
-                dashboardHandler.add_to_dashboard(event)
+                alarmList = metricAlarmHandler.create_metric_alarm(event)
+                if 'dashboard' in event:
+                    # Add metric to dashboard
+                    dashboardHandler.add_to_dashboard(event, alarmList)
         elif event['eventName'] == 'delete-metric-filter':
             for logGroup in logGroupsResp['logGroups']:
                 metricFilterHandler.delete_metric_filter(event, logGroup['logGroupName'])
         else:
             logger.error("Invalid event name")
+            return 'FAILURE'
         if 'nextToken' in logGroupsResp:
             nextToken = logGroupsResp['nextToken']
         else:
             return
     return
-
-# def __build_dashboard_request(event):
-#     request = {
-#         'dashboards': [
-#             {
-#                 'name': event['dashboard']['name']
-#             }   
-#         ]
-#     }

@@ -19,8 +19,8 @@ def create_metric_filter(request, logGroupName):
                 {
                     'metricName': request['metricName'],
                     'metricNamespace': request['namespace'],
-                    'metricValue': request['value'],
-                    'defaultValue': request['defaultValue']
+                    'metricValue': '1',
+                    'defaultValue': 0
                 }
             ]
         )

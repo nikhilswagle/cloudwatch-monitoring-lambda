@@ -1,0 +1,54 @@
+pipeline {
+  agent any
+  parameters {
+    string(name: 'S3_CODE_BUCKET', defaultValue: 'xxxxxxxxxxxxxxxx', description: 'S3 Bucket that holds Lambda Code')
+    string(name: 'S3_FOLDER_PREFIX', defaultValue: 'code/logfilter-metrics-monitoring-lambda', description: 'S3 bucket folder structure in which lambda package will reside')
+    string(name: 'PACKAGE_NAME', defaultValue: 'package', description: 'File name for lambda package')
+    string(name: 'PACKAGE_VERSION', defaultValue: '1.0', description: 'Version for lambda package')
+    choice(name: 'ACTION', choices: ['DEPLOY', 'ROLLBACK'], description: 'Deployment action to be taken to either deploy the changes or rollback')
+  }
+  environment {
+    STACK_NAME = "cf-logfilter-metrics-monitoring"
+    AWS_REGION = "us-east-1"
+  }
+  stages {
+    stage('deploy') {
+      steps {
+        script {
+          if (params.ACTION == 'DEPLOY') {
+            echo "***************************** STAGE:DEPLOY *****************************"
+            echo "Deployment started..."
+            sh 'chmod 755 deployment/deploy.sh'
+            sh "deployment/deploy.sh \
+            ${params.S3_CODE_BUCKET} \
+            ${params.S3_FOLDER_PREFIX} \
+            ${params.PACKAGE_NAME} \
+            ${params.PACKAGE_VERSION} \
+            ${env.STACK_NAME} \
+            ${env.AWS_REGION}"
+            echo "Deployment ended"
+          }
+          else if (params.ACTION == 'ROLLBACK') {
+            echo "***************************** STAGE:ROLLBACK *****************************"
+            echo "Rollback started..."
+            sh 'chmod 755 deployment/rollback.sh'
+            sh "deployment/rollback.sh \
+            ${params.S3_CODE_BUCKET} \
+            ${params.S3_FOLDER_PREFIX} \
+            ${params.PACKAGE_NAME} \
+            ${params.PACKAGE_VERSION} \
+            ${env.STACK_NAME} \
+            ${env.AWS_REGION}"
+            echo "Rollback ended"
+          }
+        }
+      }
+    }
+  }
+  post {
+    always {
+      echo 'Clean up resources'
+      deleteDir()
+    }
+  }
+}

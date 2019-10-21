@@ -1,0 +1,26 @@
+{
+    "eventName": "create-metric-filter",
+    "region": "us-east-1",
+    "logGroupNamePrefix": "/aws/lambda",
+    "filterName": "file-transfer-error-filter",
+    "filterPattern": "{ $.errorCode = \"*\" }",
+    "metricName": "file-transfer-error",
+    "namespace": "fico/file-transfer",
+    "metricAlarm": {
+      "alarmDescription": "Alerts when file transfer errors are encountered",
+      "notificationTopic": [
+        "arn:aws:sns:us-east-1:847104828221:web-server-alerts"
+      ],
+      "threshold": 1,
+      "comparisonOperator": "GreaterThanOrEqualToThreshold",
+      "tags": [
+        {
+          "Key": "project",
+          "Value": "FICO"
+        }
+      ]
+    },
+    "dashboard": {
+        "name": "Lambda Alert Dashboard"
+    }
+  }

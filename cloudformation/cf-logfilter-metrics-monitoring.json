@@ -1,0 +1,10 @@
+[
+    {
+        "ParameterKey": "LambdaCodeS3BucketName",
+        "ParameterValue": "<LambdaCodeS3BucketName>"
+    },
+    {
+        "ParameterKey": "LambdaCodeS3Key",
+        "ParameterValue": "<LambdaCodeS3Key>"
+    }
+]
