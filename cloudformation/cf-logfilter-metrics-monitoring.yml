@@ -60,6 +60,7 @@ Resources:
               - logs:PutMetricFilter
               - logs:DeleteMetricFilter
               - logs:DescribeLogGroups
+              - logs:DescribeMetricFilters
             Resource:
               - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
           - Effect: Allow

@@ -1,6 +1,7 @@
 import logging
 import traceback
 import boto3
+import metricAlarmHandler
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 client = boto3.client('logs')
@@ -36,17 +37,31 @@ Deletes specified metric filter
 def delete_metric_filter(request, logGroupName):
     describeResponse = {}
     deleteResponse = None
+    deleteAlarmRequest = request.copy()
+    deleteAlarmRequest['logGroupName'] = logGroupName
     try:
-        describeResponse = client.describe_metric_filters(
-            logGroupName=logGroupName,
-            filterNamePrefix=request['filterName']
-        )
-        if len(describeResponse['metricFilters']) > 0:
-            deleteResponse = client.delete_metric_filter(
+        if 'filterName' in request:
+            describeResponse = client.describe_metric_filters(
                 logGroupName=logGroupName,
-                filterName=request['filterName']
+                filterNamePrefix=request['filterName']
             )
-            logger.info(deleteResponse)
+        else:
+            describeResponse = client.describe_metric_filters(
+                logGroupName=logGroupName
+            )
+        if len(describeResponse['metricFilters']) > 0:
+            for metricFilter in describeResponse['metricFilters']:
+                deleteResponse = client.delete_metric_filter(
+                    logGroupName=metricFilter['logGroupName'],
+                    filterName=metricFilter['filterName']
+                )
+                logger.info(deleteResponse)
+                if 'deleteMetricAlarms' in request and request['deleteMetricAlarms']:
+                    # Start deleting alarms
+                    for metricTransformation in metricFilter['metricTransformations']:
+                        deleteAlarmRequest['metricName'] = metricTransformation['metricName']
+                        deleteAlarmRequest['metricNamespace'] = metricTransformation['metricNamespace']
+                        metricAlarmHandler.delete_metric_alarm(deleteAlarmRequest)
         else:
             deleteResponse = 'Metric filter not found: '+request['filterName']
             logger.info(deleteResponse)

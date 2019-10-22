@@ -1,0 +1,7 @@
+{
+    "eventName": "delete-metric-filter",
+    "region": "us-east-1",
+    "logGroupNamePrefix": "/aws/lambda",
+    "filterName": "file-transfer-success-filter",
+    "deleteMetricAlarms": true
+}

@@ -38,6 +38,16 @@ def create_metric_alarm(request):
         logger.error(traceback.print_stack())
     return alarmList
 
+def delete_metric_alarm(request):
+    alarmName = __get_alarm_name(__get_prefix(request), request['metricNamespace'], request['metricName'])
+    response = client.delete_alarms(
+        AlarmNames=[
+            alarmName
+        ]
+    )
+    return response
+
+
 def __get_alarm_details_by_alarm_names(alarmNameList):
     response = client.describe_alarms(
         AlarmNames=alarmNameList
