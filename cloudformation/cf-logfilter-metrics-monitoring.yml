@@ -52,6 +52,9 @@ Resources:
               - cloudwatch:DescribeAlarmsForMetric
               - cloudwatch:DeleteDashboards
               - cloudwatch:DeleteAlarms
+            Resource:
+              - !Sub arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:*
+              - !Sub arn:aws:cloudwatch::${AWS::AccountId}:dashboard/*
           - Effect: Allow
             Action:
               - logs:PutMetricFilter
