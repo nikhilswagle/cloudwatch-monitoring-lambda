@@ -20,7 +20,7 @@ def create_metric_alarm(request):
             AlarmActions=request['metricAlarm']['notificationTopic'],
             MetricName=request['metricName'],
             Namespace=request['namespace'],
-            Statistic='SampleCount',
+            Statistic='Sum',
             Period=300,
             # Unit=request['metricAlarm']['unit'],
             EvaluationPeriods=1,
